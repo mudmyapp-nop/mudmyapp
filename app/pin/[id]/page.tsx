@@ -29,7 +29,7 @@ export async function generateMetadata(
     openGraph: {
       title: pin.title,
       description: pin.description,
-      url: `https://mudmy.com/pin/${id}`,
+      url: `https://mudmy.app/pin/${id}`,
       siteName: 'Mudmy Marketplace',
       images: [
         {

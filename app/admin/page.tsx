@@ -27,6 +27,7 @@ import {
   unbanUserByAdmin,
 } from '@/lib/services/admin'
 import type { Pin, User } from '@/lib/types'
+import { MudmyConfirmDialog } from '@/components/mudmy-confirm-dialog'
 
 export default function AdminPage() {
   const router = useRouter()
@@ -52,6 +53,7 @@ export default function AdminPage() {
   const [userOrder, setUserOrder] = useState<'asc' | 'desc'>('desc')
   const [busyUserId, setBusyUserId] = useState<string | null>(null)
   const [busyPinId, setBusyPinId] = useState<string | null>(null)
+  const [confirmDeletePinId, setConfirmDeletePinId] = useState<string | null>(null)
 
   const isAdmin = useMemo(() => {
     const emailMatches = isAdminEmail(user?.email)
@@ -110,7 +112,6 @@ export default function AdminPage() {
   }, [pinSearch, userSearch, pinStatus, pinSortBy, pinOrder, userSortBy, userOrder])
 
   const handleDeletePin = async (pinId: string) => {
-    if (!confirm('ต้องการลบหมุดนี้ใช่หรือไม่')) return
     setBusyPinId(pinId)
     try {
       await deletePinByAdmin(pinId)
@@ -295,7 +296,7 @@ export default function AdminPage() {
                           </Link>
                           <button
                             type="button"
-                            onClick={() => handleDeletePin(pin.id)}
+                            onClick={() => setConfirmDeletePinId(pin.id)}
                             disabled={busyPinId === pin.id}
                             className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2 py-1 text-xs font-semibold text-rose-700 disabled:opacity-60"
                           >
@@ -425,6 +426,20 @@ export default function AdminPage() {
             </div>
           </section>
         </div>
+        <MudmyConfirmDialog
+          open={confirmDeletePinId !== null}
+          onOpenChange={(open) => !open && setConfirmDeletePinId(null)}
+          title="ต้องการลบหมุดนี้ใช่หรือไม่?"
+          description="การลบหมุดไม่สามารถย้อนกลับได้ คุณต้องการดำเนินการต่อหรือไม่"
+          confirmLabel="ลบหมุด"
+          loading={busyPinId === confirmDeletePinId}
+          onConfirm={() => {
+            if (confirmDeletePinId) {
+              handleDeletePin(confirmDeletePinId)
+              setConfirmDeletePinId(null)
+            }
+          }}
+        />
       </div>
     </div>
   )

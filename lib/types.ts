@@ -150,8 +150,9 @@ export interface Payment {
   pinId?: string
   amount: number
   status: PaymentStatus
-  method: 'promptpay'
+  method: 'promptpay' | 'stripe' | 'free'
   promptpayRef?: string
+  stripeSessionId?: string
   createdAt: string
   paidAt?: string
 }

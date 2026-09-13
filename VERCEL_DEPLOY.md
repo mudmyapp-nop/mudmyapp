@@ -25,8 +25,13 @@ pnpm build
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 NEXT_PUBLIC_APP_NAME=Mudmy
-NEXT_PUBLIC_APP_URL=https://your-domain.com
+NEXT_PUBLIC_APP_URL=https://www.mudmy.app
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 ```
+
+ตั้ง Stripe webhook ไปที่ `https://www.mudmy.app/api/payments/webhook` โดยเลือก event `checkout.session.completed` และรัน migration `supabase/migrations/20260906_add_stripe_payments.sql` ใน Supabase ก่อนเปิดใช้งานจริง
 
 6. กด **Deploy**
 
@@ -38,12 +43,25 @@ pnpm run deploy:vercel
 
 ครั้งแรกระบบจะให้ login และเลือก Vercel project จากนั้นใช้คำสั่งเดิมเพื่อ deploy production ครั้งต่อไป
 
-## 4. หลัง Deploy
+## 4. เพิ่มโดเมน `mudmy.app`
+
+1. เปิด Vercel Project `mudmyapp` > **Settings > Domains**
+2. เพิ่ม `mudmy.app` และ `www.mudmy.app` หากต้องการให้รองรับทั้งสองแบบ
+3. ที่ Hostinger DNS ให้ใส่ค่าตามที่ Vercel แสดง โดยทั่วไปคือ:
+	- ลบ `A` record เดิมของ `@` ที่ชี้ไป `2.57.91.91`
+	- เพิ่ม `A` record ชื่อ `@` ชี้ไป `216.198.79.1`
+	- เพิ่ม `A` record ชื่อ `@` ชี้ไป `64.29.17.1`
+	- หากเพิ่ม `www` ให้ตั้ง `CNAME` ชื่อ `www` ชี้ไป `cname.vercel-dns.com`
+4. ตั้งให้ `www.mudmy.app` เป็นโดเมนหลัก แล้วรอ DNS/SSL ทำงาน
+5. ตรวจสอบว่า `https://www.mudmy.app` เปิดได้ก่อน redeploy
+
+## 5. หลัง Deploy
 
 - ตั้งค่า domain ใน Vercel Project Settings > Domains
-- เปลี่ยน `NEXT_PUBLIC_APP_URL` ให้ตรงกับ domain จริง แล้ว redeploy
+- ตั้ง `NEXT_PUBLIC_APP_URL=https://www.mudmy.app` ใน Vercel Production แล้ว redeploy
 - เพิ่ม URL ของเว็บไซต์ใน Supabase Authentication > URL Configuration
-- ตรวจสอบ Redirect URLs สำหรับ login และ callback
+- เพิ่ม `https://www.mudmy.app/auth/callback` ใน Supabase Redirect URLs
+- ตั้ง Site URL ของ Supabase เป็น `https://www.mudmy.app`
 - เปิด Supabase backups และติดตาม Database/Storage usage
 - ทดสอบ login, แผนที่, สร้างหมุด, รูปภาพ, chat และ API routes บน production
 

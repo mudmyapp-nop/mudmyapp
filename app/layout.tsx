@@ -35,13 +35,20 @@ export const metadata: Metadata = {
       ? rawAppUrl
       : 'https://mudmyapp.vercel.app'
   ),
-  title: 'หมุดหมาย (Mudmy) | ตลาดชุมชนบนแผนที่ ค้นหาสินค้าและบริการใกล้บ้าน',
-  description: 'หมุดหมาย (Mudmy) คือแพลตฟอร์มตลาดชุมชนบนแผนที่สำหรับคนไทย ค้นหาสินค้า ร้านค้า งาน บริการ และโอกาสใกล้บ้าน พร้อมปักหมุดธุรกิจของคุณให้คนในพื้นที่ค้นพบได้ง่าย',
+  title: {
+    default: 'หมุดหมาย (Mudmy) | ตลาดชุมชนไทยบนแผนที่',
+    template: '%s | หมุดหมาย Mudmy',
+  },
+  description: 'หมุดหมาย (Mudmy) คือแพลตฟอร์มชุมชนไทยบนแผนที่สำหรับค้นหาสินค้า ร้านค้า งาน บริการ ข่าวสาร และความช่วยเหลือใกล้บ้าน พร้อมปักหมุดให้คนในพื้นที่ค้นพบ',
   keywords: [
     'หมุดหมาย',
     'Mudmy',
     'ตลาดชุมชน',
     'ตลาดออนไลน์ใกล้บ้าน',
+    'ชุมชนออนไลน์ไทย',
+    'ข่าวสารชุมชน',
+    'หางานใกล้บ้าน',
+    'บริการใกล้ฉัน',
     'ค้นหาสินค้าใกล้ฉัน',
     'ค้นหาบริการใกล้บ้าน',
     'ปักหมุดธุรกิจ',
@@ -51,6 +58,9 @@ export const metadata: Metadata = {
   authors: [{ name: 'Phichaya HR Solutions', url: 'https://www.phichaya.com' }],
   creator: 'Phichaya HR Solutions',
   publisher: 'Phichaya HR Solutions',
+  verification: {
+    google: '1fmIzR3QDjMY95EhBGGHTuXrrvW0UPbxIYIrpAPK9Us',
+  },
   alternates: { canonical: '/' },
   robots: { index: true, follow: true },
   openGraph: {
@@ -59,13 +69,13 @@ export const metadata: Metadata = {
     locale: 'th_TH',
     type: 'website',
     siteName: 'หมุดหมาย (Mudmy)',
-    images: [{ url: '/images/Hero/Hero1.jpg', width: 1688, height: 1125, alt: 'หมุดหมาย ตลาดชุมชนบนแผนที่' }],
+    images: [{ url: '/landingapp.jpg', width: 1536, height: 1024, alt: 'หมุดหมาย Mudmy ชุมชนไทยบนแผนที่' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'หมุดหมาย (Mudmy) | ตลาดชุมชนบนแผนที่',
     description: 'ค้นหาสินค้า บริการ และโอกาสใกล้บ้าน พร้อมปักหมุดธุรกิจของคุณให้คนในพื้นที่ค้นพบ',
-    images: ['/images/Hero/Hero1.jpg'],
+    images: ['/landingapp.jpg'],
   },
   icons: {
     icon: [
@@ -126,20 +136,46 @@ export default function RootLayout({
           id="mudmy-structured-data"
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'WebApplication',
-              name: 'หมุดหมาย (Mudmy)',
-              url: process.env.NEXT_PUBLIC_APP_URL || 'https://mudmy.app',
-              description: 'แพลตฟอร์มตลาดชุมชนบนแผนที่สำหรับค้นหาสินค้า บริการ ร้านค้า งาน และโอกาสใกล้บ้าน',
-              applicationCategory: 'Marketplace',
-              operatingSystem: 'Web',
-              creator: {
-                '@type': 'Organization',
-                name: 'Phichaya HR Solutions',
-                url: 'https://www.phichaya.com',
+            __html: JSON.stringify([
+              {
+                '@context': 'https://schema.org',
+                '@type': 'WebApplication',
+                name: 'หมุดหมาย (Mudmy)',
+                url: 'https://mudmy.app',
+                description: 'แพลตฟอร์มชุมชนไทยบนแผนที่สำหรับค้นหาสินค้า บริการ ร้านค้า งาน ข่าวสาร และความช่วยเหลือใกล้บ้าน',
+                applicationCategory: 'Marketplace',
+                operatingSystem: 'Web',
+                inLanguage: 'th-TH',
+                areaServed: { '@type': 'Country', name: 'Thailand' },
+                creator: {
+                  '@type': 'Organization',
+                  name: 'Phichaya HR Solutions',
+                  url: 'https://www.phichaya.com',
+                },
               },
-            }),
+              {
+                '@context': 'https://schema.org',
+                '@type': 'Organization',
+                name: 'หมุดหมาย (Mudmy)',
+                url: 'https://mudmy.app',
+                logo: 'https://mudmy.app/logo1.png',
+                description: 'แพลตฟอร์มชุมชนไทยที่เชื่อมโยงผู้คน สินค้า บริการ งาน ข่าวสาร และโอกาสใกล้บ้าน',
+                areaServed: { '@type': 'Country', name: 'Thailand' },
+                knowsAbout: ['ตลาดชุมชน', 'สินค้าและบริการใกล้บ้าน', 'งานในชุมชน', 'ข่าวสารชุมชน'],
+              },
+              {
+                '@context': 'https://schema.org',
+                '@type': 'WebSite',
+                name: 'หมุดหมาย Mudmy',
+                url: 'https://mudmy.app',
+                inLanguage: 'th-TH',
+                potentialAction: {
+                  '@type': 'SearchAction',
+                  target: 'https://mudmy.app/explore?q={search_term_string}',
+                  'query-input': 'required name=search_term_string',
+                },
+              },
+            ]),
           }}
         />
         <Analytics />

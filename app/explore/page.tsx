@@ -2,13 +2,12 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import { Plus, Search, SlidersHorizontal, Loader2, MapPin, Home } from 'lucide-react'
+import { Plus, Search, SlidersHorizontal, Loader2, Home, X } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { MapView } from '@/components/map-view'
 import { PinBottomSheet } from '@/components/pin-bottom-sheet'
-import { CategoryFilter } from '@/components/category-filter'
 import { PinCard } from '@/components/pin-card'
 import { getAllPins } from '@/lib/services/pins'
 import { useAuth } from '@/contexts/auth-context'
@@ -42,7 +41,6 @@ function ExplorePageContent() {
   const [loadingPins, setLoadingPins] = useState(true)
   const [selectedPin, setSelectedPin] = useState<Pin | null>(null)
   const [filterCategory, setFilterCategory] = useState<PinCategory | 'all'>('all')
-  const [onlyMyPins, setOnlyMyPins] = useState(false)
   const [viewMode, setViewMode] = useState<ViewMode>('map')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortMode, setSortMode] = useState<'newest' | 'nearest'>('newest')
@@ -138,9 +136,6 @@ function ExplorePageContent() {
     const excludeIds = [...(user?.blockedUsers || []), ...(user?.blockedBy || [])]
     const notBlocked = !excludeIds.includes(pin.ownerId || '')
 
-    // My pins filter
-    const matchMyPins = !onlyMyPins || (user && pin.ownerId === user.id)
-
     // Spatial filter
     const matchRadius = radiusKm === null || (
       userLocation && typeof pin.lat === 'number' && typeof pin.lng === 'number'
@@ -148,7 +143,7 @@ function ExplorePageContent() {
       : false
     )
 
-    return matchCat && matchSearch && notBlocked && matchMyPins && matchRadius
+    return matchCat && matchSearch && notBlocked && matchRadius
   })
 
 
@@ -234,9 +229,23 @@ function ExplorePageContent() {
               placeholder="ค้นหาหมุดหมาย หรือบริการ..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 rounded-2xl h-11 text-xs sm:text-sm shadow-sm bg-white/95 dark:bg-slate-900/95 border-slate-200/80 dark:border-slate-800 focus:border-primary focus:ring-1 focus:ring-primary/30"
+              className={cn(
+                "pl-10 rounded-2xl h-11 text-xs sm:text-sm shadow-sm bg-white/95 dark:bg-slate-900/95 border-slate-200/80 dark:border-slate-800 focus:border-primary focus:ring-1 focus:ring-primary/30",
+                searchQuery && "pr-10"
+              )}
               autoComplete="off"
             />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                aria-label="ล้างคำค้นหา"
+                title="ล้างคำค้นหา"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
 
           {/* Category Dropdown Filter */}
@@ -264,42 +273,6 @@ function ExplorePageContent() {
           </div>
         </div>
 
-        {/* Horizontal Quick Action Cards Carousel */}
-        <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto scrollbar-hide py-0.5">
-          {/* Card 1: รายละเอียด หมุดของฉัน */}
-          <button
-            onClick={() => setOnlyMyPins(prev => !prev)}
-            className={cn(
-              'flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-left shrink-0 transition-all duration-300 border group min-w-[135px]',
-              onlyMyPins
-                ? 'bg-gradient-to-r from-primary to-primary/80 text-white border-transparent shadow-lg shadow-primary/25 scale-[1.02]'
-                : 'bg-white/95 dark:bg-slate-900/95 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-800 hover:border-primary/40 hover:shadow-md'
-            )}
-          >
-            <div className={cn(
-              "w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors",
-              onlyMyPins ? "bg-white/25 text-white" : "bg-primary/10 dark:bg-primary/20 text-primary"
-            )}>
-              <MapPin className="w-4 h-4" />
-            </div>
-            <div className="flex-1 min-w-0 pr-1">
-              <p className={cn("text-xs font-bold leading-tight", onlyMyPins ? "text-white" : "text-slate-800 dark:text-slate-100")}>
-                รายละเอียด
-              </p>
-              <p className={cn("text-[10px] leading-tight truncate", onlyMyPins ? "text-white/85" : "text-slate-400 dark:text-slate-400")}>
-                หมุดของฉัน
-              </p>
-            </div>
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={cn("shrink-0 opacity-70 group-hover:translate-x-0.5 transition-transform", onlyMyPins ? "text-white" : "text-slate-400")}><path d="m9 18 6-6-6-6"/></svg>
-          </button>
-
-          {/* Quick Category Cards Carousel */}
-          <CategoryFilter 
-            selected={filterCategory} 
-            onChange={(cat) => setFilterCategory(cat)} 
-            className="flex-1"
-          />
-        </div>
       </div>
 
       {/* Main Content (Map / List) */}
@@ -405,20 +378,8 @@ function ExplorePageContent() {
         )}
       </main>
 
-      {/* Floating Action Button (FAB) - '+ เพิ่มหมุด' (As in Image) */}
-      <Link
-        href="/create-pin"
-        className={cn("fixed bottom-20 right-4 sm:bottom-8 sm:right-8 z-40 group", selectedPin && "hidden")}
-        aria-label="เพิ่มหมุด"
-      >
-        <div className="w-16 h-16 sm:w-16 sm:h-16 rounded-full bg-primary shadow-xl shadow-primary/40 hover:shadow-primary/60 hover:scale-105 active:scale-95 transition-all duration-300 flex flex-col items-center justify-center text-white border-2 border-white/40">
-          <Plus className="w-6 h-6 stroke-[2.5]" />
-          <span className="text-[9px] font-bold -mt-0.5 tracking-tight">เพิ่มหมุด</span>
-        </div>
-      </Link>
-
       {/* Bottom Navigation Bar (As in Image) */}
-      <nav className={cn("z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border-t border-slate-200/80 dark:border-slate-800/80 px-4 py-2 shadow-2xl shrink-0", selectedPin && "hidden")}>
+      <nav className={cn("fixed inset-x-0 bottom-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border-t border-slate-200/80 dark:border-slate-800/80 px-4 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] shadow-2xl", selectedPin && "hidden")}>
         <div className="max-w-md mx-auto flex items-center justify-around gap-1">
           {/* Tab 1: Home */}
           <Link
@@ -465,21 +426,16 @@ function ExplorePageContent() {
             <span className="text-[11px]">รายการ</span>
           </button>
 
-          {/* Tab 4: บัญชี */}
+          {/* Tab 4: เพิ่มหมุด */}
           <Link
-            href="/dashboard"
-            className="flex flex-col items-center gap-1 px-3 py-1 text-slate-400 hover:text-slate-600 transition-all"
+            href="/create-pin"
+            aria-label="เพิ่มหมุด"
+            className="flex flex-col items-center gap-1 px-3 py-1 text-primary hover:text-primary/80 transition-all"
           >
-            <div className="w-[22px] h-[22px] rounded-full overflow-hidden border border-slate-300 flex-shrink-0">
-              {user?.avatar ? (
-                <img src={user.avatar} alt="profile" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full bg-slate-200 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
-                </div>
-              )}
+            <div className="flex h-[22px] w-[22px] items-center justify-center">
+              <Plus className="h-[22px] w-[22px] stroke-[2.5]" />
             </div>
-            <span className="text-[11px]">บัญชี</span>
+            <span className="text-[11px] font-bold">เพิ่มหมุด</span>
           </Link>
         </div>
       </nav>

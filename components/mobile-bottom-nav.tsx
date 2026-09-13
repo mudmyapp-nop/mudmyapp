@@ -37,9 +37,9 @@ export function MobileBottomNav() {
   }, [user])
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
-      <div className="mx-auto max-w-md px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)]">
-        <div className="mudmy-bottom-nav pointer-events-auto relative flex items-end justify-around h-[4.5rem] rounded-[1.75rem] border border-border/50 bg-background/98 px-1.5 pt-2 pb-1.5 shadow-2xl shadow-black/15 backdrop-blur-2xl">
+    <nav className="mudmy-mobile-bottom-nav fixed inset-x-0 bottom-0 z-50 hidden w-full pointer-events-none md:hidden">
+      <div className="mx-auto box-border w-full max-w-[28rem] overflow-hidden px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)]">
+        <div className="mudmy-bottom-nav pointer-events-auto relative grid h-[4.5rem] min-w-0 grid-cols-5 items-end overflow-hidden rounded-[1.75rem] border border-border/50 bg-background/98 px-1.5 pt-2 pb-1.5 shadow-2xl shadow-black/15 backdrop-blur-2xl">
           {/* Left 2 */}
           {NAV.slice(0, 2).map((item) => {
             const active = pathname === item.href
@@ -49,7 +49,7 @@ export function MobileBottomNav() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'relative flex flex-col items-center justify-center gap-1 rounded-2xl text-[10px] font-bold transition-all min-w-[4rem] py-2',
+                  'relative col-span-1 flex min-w-0 flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl px-1 py-2 text-[10px] font-bold transition-all',
                   active 
                     ? 'text-primary bg-primary/15 scale-105' 
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/50 active:scale-95'
@@ -61,13 +61,13 @@ export function MobileBottomNav() {
                 )}>
                   <Icon className={cn('w-5.5 h-5.5', active && 'drop-shadow-sm stroke-[2.5]')} />
                 </div>
-                <span className="leading-none">{item.label}</span>
+                <span className="min-w-0 max-w-full truncate leading-none">{item.label}</span>
               </Link>
             )
           })}
 
           {/* Center FAB - Elevated */}
-          <div className="flex items-center justify-center min-w-[4.5rem]">
+          <div className="col-span-1 flex min-w-0 items-center justify-center">
             <Link
               href="/create-pin"
               aria-label="สร้างหมุด"
@@ -95,7 +95,7 @@ export function MobileBottomNav() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'relative flex flex-col items-center justify-center gap-1 rounded-2xl text-[10px] font-bold transition-all min-w-[4rem] py-2',
+                  'relative col-span-1 flex min-w-0 flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl px-1 py-2 text-[10px] font-bold transition-all',
                   active 
                     ? 'text-primary bg-primary/15 scale-105' 
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/50 active:scale-95'
@@ -107,7 +107,7 @@ export function MobileBottomNav() {
                 )}>
                   <Icon className={cn('w-5.5 h-5.5', active && 'drop-shadow-sm stroke-[2.5]')} />
                 </div>
-                <span className="leading-none">{item.label}</span>
+                <span className="min-w-0 max-w-full truncate leading-none">{item.label}</span>
 
                 {isChat && unreadCount > 0 && (
                   <span className="absolute top-0 right-2 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-destructive-foreground ring-2 ring-background animate-in zoom-in">

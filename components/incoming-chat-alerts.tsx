@@ -46,7 +46,7 @@ export function IncomingChatAlerts() {
       if (!isFirstLoad.current && totalUnread > lastTotalRef.current && latestMessagePreview) {
         const sender = sortedConvs.find((c) => c.participants.includes(latestSenderId))
         const senderName = sender?.participantNames[latestSenderId] || 'ใครบางคน'
-        playNotificationAlert()
+        void playNotificationAlert()
         toast.message(`ข้อความใหม่จาก ${senderName}`, {
           description: latestMessagePreview,
         })

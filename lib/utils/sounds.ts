@@ -362,10 +362,10 @@ export function playSound(soundType?: SoundType) {
   manager.play(soundType)
 }
 
-export function playNotificationAlert() {
+export async function playNotificationAlert() {
   const manager = getSoundManager()
   if (!manager.isEnabled()) return
-  manager.unlock()
+  await manager.unlock()
   manager.play()
 }
 

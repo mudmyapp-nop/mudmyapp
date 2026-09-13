@@ -3,15 +3,18 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { useAuth } from '@/contexts/auth-context'
 import { useRouter } from 'next/navigation'
-import { subscribeToUserConversations, markConversationAsRead } from '@/lib/services/messages'
+import { subscribeToUserConversations, markConversationAsRead, deleteConversation } from '@/lib/services/messages'
 import type { Conversation, Pin } from '@/lib/types'
 import { Navbar } from '@/components/navbar'
 import { ChatModal } from '@/components/chat-modal'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Ban, MessageCircle, Loader2, Search, X } from 'lucide-react'
+import { Ban, MessageCircle, Loader2, Search, X, Trash2 } from 'lucide-react'
 import { useLanguage } from '@/contexts/language-context'
 import { getPin } from '@/lib/services/pins'
 import { cn } from '@/lib/utils'
+import { MobileBottomNav } from '@/components/mobile-bottom-nav'
+import { toast } from 'sonner'
+import { MudmyConfirmDialog } from '@/components/mudmy-confirm-dialog'
 
 // Highlights matching substring in text
 function HighlightText({ text, query }: { text: string; query: string }) {
@@ -61,6 +64,8 @@ export default function MessagesPage() {
   const [selectedPin, setSelectedPin] = useState<Pin | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchFocused, setIsSearchFocused] = useState(false)
+  const [deletingConversationId, setDeletingConversationId] = useState<string | null>(null)
+  const [confirmDeleteConversationId, setConfirmDeleteConversationId] = useState<string | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   const unsubscribeRef = useRef<(() => void) | null>(null)
@@ -176,6 +181,20 @@ export default function MessagesPage() {
     searchInputRef.current?.focus()
   }
 
+  const handleDeleteConversation = async (conversationId: string) => {
+    setDeletingConversationId(conversationId)
+    try {
+      await deleteConversation(conversationId)
+      setConversations((prev) => prev.filter((conversation) => conversation.id !== conversationId))
+      toast.success('ลบประวัติการสนทนาแล้ว')
+    } catch (error) {
+      console.error('Failed to delete conversation:', error)
+      toast.error('ไม่สามารถลบประวัติการสนทนาได้')
+    } finally {
+      setDeletingConversationId(null)
+    }
+  }
+
   const totalUnread = conversations.reduce(
     (sum, conv) => sum + (conv.unreadCount?.[user?.id || ''] || 0),
     0
@@ -192,10 +211,10 @@ export default function MessagesPage() {
   if (!user) return null
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen w-full min-w-0 overflow-x-hidden bg-background flex flex-col">
       <Navbar isLoggedIn />
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+      <main className="flex-1 max-w-3xl mx-auto w-full min-w-0 px-4 py-8 pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -398,6 +417,24 @@ export default function MessagesPage() {
                       {unreadCount}
                     </div>
                   )}
+
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      setConfirmDeleteConversationId(conv.id)
+                    }}
+                    disabled={deletingConversationId === conv.id}
+                    className="shrink-0 rounded-xl p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
+                    aria-label="ลบประวัติการสนทนา"
+                    title="ลบประวัติการสนทนา"
+                  >
+                    {deletingConversationId === conv.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </button>
                 </div>
               )
             })}
@@ -413,6 +450,23 @@ export default function MessagesPage() {
           onClose={() => setSelectedPin(null)}
         />
       )}
+
+      <MudmyConfirmDialog
+        open={confirmDeleteConversationId !== null}
+        onOpenChange={(open) => !open && setConfirmDeleteConversationId(null)}
+        title="ลบประวัติการสนทนา?"
+        description="ข้อความทั้งหมดในห้องนี้จะถูกลบและไม่สามารถย้อนกลับได้"
+        confirmLabel="ลบประวัติ"
+        loading={deletingConversationId === confirmDeleteConversationId}
+        onConfirm={() => {
+          if (confirmDeleteConversationId) {
+            handleDeleteConversation(confirmDeleteConversationId)
+            setConfirmDeleteConversationId(null)
+          }
+        }}
+      />
+
+      <MobileBottomNav />
     </div>
   )
 }

@@ -21,6 +21,7 @@ export function SiteFooter() {
 
         <div className="flex flex-col items-start gap-4 sm:items-end">
           <nav aria-label="ข้อมูลเว็บไซต์" className="flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold">
+            <Link href="/about" className="transition-colors hover:text-primary">เกี่ยวกับเรา</Link>
             <Link href="/disclaimer" className="transition-colors hover:text-primary">ข้อจำกัดความรับผิดชอบ</Link>
             <Link href="/privacy-policy" className="transition-colors hover:text-primary">นโยบายความเป็นส่วนตัว</Link>
           </nav>

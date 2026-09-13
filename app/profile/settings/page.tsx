@@ -21,6 +21,7 @@ import { compressImage } from '@/lib/utils/image'
 import { toast } from 'sonner'
 import { getSoundManager, playSound, setSoundVolume, getSoundVolume, SOUND_OPTIONS } from '@/lib/utils/sounds'
 import { cn } from '@/lib/utils'
+import { MobileBottomNav } from '@/components/mobile-bottom-nav'
 
 export default function ProfileSettingsPage() {
   const { t } = useLanguage()
@@ -163,7 +164,7 @@ export default function ProfileSettingsPage() {
     <div className="min-h-screen bg-background">
       <Navbar isLoggedIn={!!user} />
 
-      <main className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 sm:py-10">
+      <main className="mx-auto w-full max-w-3xl px-4 py-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:px-6 sm:py-10 md:pb-10">
         {/* Header */}
         <div className="mb-6 flex items-center gap-3 sm:mb-8">
           <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0 rounded-xl" onClick={() => router.back()}>
@@ -679,6 +680,8 @@ export default function ProfileSettingsPage() {
           </Button>
         </form>
       </main>
+
+      <MobileBottomNav />
     </div>
   )
 }

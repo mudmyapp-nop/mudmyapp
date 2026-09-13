@@ -191,8 +191,8 @@ export function ReviewSection({ pinId, compact = false }: ReviewSectionProps) {
                 </div>
               )}
 
-              <div className="flex items-center justify-between gap-3 pt-2">
-                <div className="relative">
+              <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="relative min-w-0">
                   <input 
                     type="file" 
                     id={`review-image-upload-${pinId}`} 
@@ -212,7 +212,7 @@ export function ReviewSection({ pinId, compact = false }: ReviewSectionProps) {
                     )}
                   >
                     <Camera className="w-4 h-4" />
-                    <span>อัปโหลดรูป ({images.length}/{MAX_IMAGES})</span>
+                    <span className="truncate">อัปโหลดรูป ({images.length}/{MAX_IMAGES})</span>
                   </label>
                 </div>
 
@@ -220,7 +220,7 @@ export function ReviewSection({ pinId, compact = false }: ReviewSectionProps) {
                   size={compact ? "sm" : "default"}
                   disabled={!newComment.trim() || submittingReview}
                   onClick={handleSubmit}
-                  className="rounded-xl font-black px-6 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-white"
+                  className="w-full rounded-xl font-black px-6 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-white sm:w-auto"
                 >
                   {submittingReview ? (
                     <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('common.loading')}</>

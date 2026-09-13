@@ -120,8 +120,13 @@ create table if not exists public.pins (
   owner_type text not null default 'personal',
   is_free_pin boolean not null default false,
   last_checked_in_at timestamp with time zone,
+  show_on_map boolean not null default true,
+  display_schedule jsonb,
   updated_at timestamp with time zone not null default now()
 );
+
+alter table public.pins add column if not exists show_on_map boolean not null default true;
+alter table public.pins add column if not exists display_schedule jsonb;
 
 -- RLS for Pins
 alter table public.pins enable row level security;
@@ -330,6 +335,7 @@ create table if not exists public.payments (
   status text not null,
   method text not null,
   promptpay_ref text,
+  stripe_session_id text,
   created_at timestamp with time zone not null default now(),
   paid_at timestamp with time zone,
   updated_at timestamp with time zone not null default now()
@@ -457,7 +463,7 @@ begin
   delete from storage.objects
   where bucket_id = 'mudmy'
     and (storage.foldername(name))[1] = 'chats'
-    and created_at < now() - interval '7 days';
+    and created_at < now() - interval '10 days';
 
   get diagnostics deleted_count = row_count;
   return deleted_count;

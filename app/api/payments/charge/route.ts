@@ -1,17 +1,19 @@
 import { NextResponse } from 'next/server';
-import { buildOmisePromptpaySource } from '@/lib/omise';
-
-const omiseApiUrl = 'https://api.omise.co';
+import Stripe from 'stripe';
 
 export async function POST(request: Request) {
   try {
-    const { amount, email, description, name, phone, userId, pinId } = await request.json();
+    const { amount, email, description, userId, pinId, paymentId } = await request.json();
 
-    if (!process.env.OMISE_SECRET_KEY) {
+    if (!process.env.STRIPE_SECRET_KEY) {
       return NextResponse.json(
-        { error: 'OMISE_SECRET_KEY is not configured. Please add your Omise secret key in environment variables.' },
+        { error: 'STRIPE_SECRET_KEY is not configured.' },
         { status: 500 }
       );
+    }
+
+    if (!userId || !pinId || !paymentId) {
+      return NextResponse.json({ error: 'Missing payment details' }, { status: 400 });
     }
 
     const numericAmount = Number(amount ?? 10);
@@ -19,41 +21,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid payment amount' }, { status: 400 });
     }
 
-    const sourcePayload = buildOmisePromptpaySource({
-      amount: numericAmount,
-      description: description || 'Mudmy pin payment',
-      email,
-      phone,
-      name,
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY.trim());
+    const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      customer_email: email || undefined,
+      line_items: [{
+        price_data: {
+          currency: 'thb',
+          product_data: { name: description || 'Mudmy pin listing' },
+          unit_amount: Math.round(numericAmount * 100),
+        },
+        quantity: 1,
+      }],
+      metadata: { paymentId, userId, pinId },
+      success_url: `${origin}/dashboard?payment=success`,
+      cancel_url: `${origin}/create-pin?payment=cancelled`,
     });
-
-    const secretKey = process.env.OMISE_SECRET_KEY.trim();
-
-    const response = await fetch(`${omiseApiUrl}/sources`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Basic ${Buffer.from(`${secretKey}:`).toString('base64')}`,
-        'Content-Type': 'application/json',
-        'Omise-Version': process.env.OMISE_API_VERSION || '2019-05-29',
-      },
-      body: JSON.stringify(sourcePayload),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: data?.message || 'Omise source creation failed' },
-        { status: response.status || 500 }
-      );
-    }
 
     return NextResponse.json({
       ok: true,
-      source: data,
-      userId,
-      pinId,
-      amount: numericAmount,
+      url: session.url,
+      sessionId: session.id,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';

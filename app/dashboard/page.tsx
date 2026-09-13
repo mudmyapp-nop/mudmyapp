@@ -18,7 +18,7 @@ import { Navbar } from '@/components/navbar'
 import { useAuth } from '@/contexts/auth-context'
 import { useLanguage } from '@/contexts/language-context'
 import { useRouter } from 'next/navigation'
-import { getUserPins, checkInFreePin, renewPaidPin } from '@/lib/services/pins'
+import { getUserPins, checkInFreePin, renewPaidPin, deletePin } from '@/lib/services/pins'
 import { getUserPayments } from '@/lib/services/payments'
 import type { Pin, Payment } from '@/lib/types'
 import { CATEGORIES } from '@/lib/types'
@@ -27,6 +27,9 @@ import { getUserDailyAnalytics, type DailyAnalytics } from '@/lib/services/analy
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { ShoppingBag, Wrench, Briefcase, Building2, Car, Loader2, PawPrint } from 'lucide-react'
 import { getSoundManager, playSound, setSoundVolume, SOUND_OPTIONS } from '@/lib/utils/sounds'
+import { MobileBottomNav } from '@/components/mobile-bottom-nav'
+import { MudmyConfirmDialog } from '@/components/mudmy-confirm-dialog'
+import { toast } from 'sonner'
 
 const ICON_MAP: Record<string, React.ElementType> = {
   ShoppingBag, Wrench, Briefcase, HeartHandshake, Building2, Car, PawPrint,
@@ -44,6 +47,7 @@ export default function DashboardPage() {
   const [dailyAnalytics, setDailyAnalytics] = useState<DailyAnalytics[]>([])
   const [loadingData, setLoadingData] = useState(true)
   const [loadingPinId, setLoadingPinId] = useState<string | null>(null)
+  const [deletePinId, setDeletePinId] = useState<string | null>(null)
   
   // Sound notification settings
   const [soundEnabled, setSoundEnabled] = useState(true)
@@ -151,15 +155,28 @@ export default function DashboardPage() {
     }
   }
 
+  const handleDelete = async (pinId: string) => {
+    setLoadingPinId(pinId)
+    try {
+      await deletePin(pinId)
+      setPins((currentPins) => currentPins.filter((pin) => pin.id !== pinId))
+    } catch (error) {
+      console.error('Failed to delete pin:', error)
+      toast.error('ไม่สามารถลบหมุดได้ กรุณาลองใหม่อีกครั้ง')
+    } finally {
+      setLoadingPinId(null)
+    }
+  }
+
   const totalViews = pins.reduce((sum, pin) => sum + pin.views, 0)
   const totalClicks = pins.reduce((sum, pin) => sum + pin.clicks, 0)
   const totalSpent = payments.filter(p => p.status === 'paid').reduce((sum, p) => sum + p.amount, 0)
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen w-full min-w-0 overflow-x-hidden bg-background">
       <Navbar isLoggedIn={!!user} />
 
-      <main className="max-w-4xl mx-auto px-4 py-6">
+      <main className="mx-auto w-full min-w-0 max-w-4xl px-4 py-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-6">
 
         {/* ─── Hero Header ─────────────────────────────────────────── */}
         <div className="relative rounded-3xl overflow-hidden mb-6 bg-gradient-to-br from-primary via-primary/90 to-secondary p-6 shadow-xl shadow-primary/20">
@@ -322,16 +339,16 @@ export default function DashboardPage() {
                               ))}
                             </div>
 
-                            <div className="flex items-center gap-2">
-                              <Link href={`/pin/${pin.id}`} className="flex-1">
-                                <Button variant="outline" size="sm" className="w-full rounded-xl text-xs h-8 gap-1">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Link href={`/pin/${pin.id}`} className="flex-1 min-w-0">
+                                <Button variant="outline" size="sm" className="w-full min-w-0 rounded-xl text-xs h-8 gap-1 px-2">
                                   <Eye className="w-3 h-3" /> ดูหมุด
                                 </Button>
                               </Link>
                               {pin.isFreePin ? (
                                 <Button
                                   size="sm"
-                                  className="flex-1 rounded-xl text-xs h-8 gap-1 bg-emerald-500 hover:bg-emerald-600 text-white"
+                                  className="flex-1 min-w-0 rounded-xl text-xs h-8 gap-1 px-2 bg-emerald-500 hover:bg-emerald-600 text-white"
                                   onClick={() => handleCheckIn(pin.id)}
                                   disabled={loadingPinId === pin.id}
                                 >
@@ -343,7 +360,7 @@ export default function DashboardPage() {
                               ) : (
                                 <Button
                                   size="sm"
-                                  className="flex-1 rounded-xl text-xs h-8 gap-1 bg-primary text-white"
+                                  className="flex-1 min-w-0 rounded-xl text-xs h-8 gap-1 px-2 bg-primary text-white"
                                   onClick={() => handleRenew(pin.id)}
                                   disabled={loadingPinId === pin.id}
                                 >
@@ -356,9 +373,13 @@ export default function DashboardPage() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="rounded-xl h-8 w-8 p-0 text-destructive/60 hover:text-destructive hover:bg-destructive/10"
+                                className="shrink-0 rounded-xl h-8 w-8 p-0 text-destructive/60 hover:text-destructive hover:bg-destructive/10"
+                                onClick={() => setDeletePinId(pin.id)}
+                                disabled={loadingPinId === pin.id}
+                                aria-label="ลบหมุด"
+                                title="ลบหมุด"
                               >
-                                <Trash2 className="w-3 h-3" />
+                                {loadingPinId === pin.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
                               </Button>
                             </div>
                           </div>
@@ -690,6 +711,22 @@ export default function DashboardPage() {
           </TabsContent>
         </Tabs>
       </main>
+      <MudmyConfirmDialog
+        open={deletePinId !== null}
+        onOpenChange={(open) => !open && setDeletePinId(null)}
+        title="ต้องการลบหมุดนี้ใช่หรือไม่?"
+        description="การลบหมุดไม่สามารถย้อนกลับได้ คุณต้องการดำเนินการต่อหรือไม่"
+        confirmLabel="ลบหมุด"
+        loading={loadingPinId === deletePinId}
+        onConfirm={() => {
+          if (deletePinId) {
+            handleDelete(deletePinId)
+            setDeletePinId(null)
+          }
+        }}
+      />
+
+      <MobileBottomNav />
     </div>
   )
 }

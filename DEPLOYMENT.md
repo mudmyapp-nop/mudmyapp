@@ -72,7 +72,12 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 # App Configuration
 NEXT_PUBLIC_APP_NAME=Mudmy
 NEXT_PUBLIC_APP_URL=https://your-domain.com
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 ```
+
+ตั้ง Stripe webhook ไปที่ `https://your-domain.com/api/payments/webhook` สำหรับ event `checkout.session.completed` และรัน `supabase/migrations/20260906_add_stripe_payments.sql` ใน Supabase ก่อนใช้งานจริง
 
 ### 3. Set Up Node.js Application
 

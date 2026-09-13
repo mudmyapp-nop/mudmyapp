@@ -396,7 +396,7 @@ export default function HomePage() {
 
   return (
     <div className="mudmy-app-shell min-h-screen bg-background">
-      <main className="mx-auto w-full max-w-6xl px-4 pt-2 pb-28 sm:px-6 lg:px-10">
+      <main className="mx-auto w-full max-w-6xl px-4 pt-2 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-10 lg:pb-10">
         {/* Header */}
         <div className="mudmy-home-header sticky top-0 z-40 -mx-4 px-4 pt-2 pb-2 sm:-mx-6 sm:px-6 lg:-mx-10 lg:px-10">
         <div className="flex items-center justify-between">

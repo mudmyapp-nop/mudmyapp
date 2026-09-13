@@ -31,6 +31,7 @@ import { getPublicUserPins } from '@/lib/services/pins'
 import { getUserFavorites, removeFavorite } from '@/lib/services/favorites'
 import { toast } from 'sonner'
 import { PinCard } from '@/components/pin-card'
+import { MobileBottomNav } from '@/components/mobile-bottom-nav'
 
 export default function PublicProfilePage() {
   const { t } = useLanguage()
@@ -120,7 +121,7 @@ export default function PublicProfilePage() {
     <div className="min-h-screen bg-background pb-20">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-4 py-12">
+      <main className="max-w-4xl mx-auto px-4 py-12 pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-12">
         {/* Profile Card */}
         <section className="bg-card rounded-[2.5rem] border border-border/50 shadow-xl overflow-hidden mb-8">
           <div className="h-40 bg-gradient-to-br from-primary via-primary/80 to-secondary relative flex items-end px-8 pb-4">
@@ -565,6 +566,8 @@ export default function PublicProfilePage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <MobileBottomNav />
     </div>
   )
 }

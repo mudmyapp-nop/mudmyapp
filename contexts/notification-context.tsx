@@ -3,12 +3,13 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useAuth } from './auth-context';
 import { updateFcmToken } from '@/lib/services/users';
+import { toast } from 'sonner';
 
 interface NotificationContextType {
   fcmToken: string | null;
   permission: NotificationPermission;
   isEnabled: boolean;
-  requestPermission: () => Promise<void>;
+  requestPermission: () => Promise<boolean>;
   toggleNotifications: () => Promise<void>;
 }
 
@@ -36,8 +37,11 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const requestPermission = async () => {
-    if (typeof window === 'undefined' || !('Notification' in window)) return;
+  const requestPermission = async (): Promise<boolean> => {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      toast.error('เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือน');
+      return false;
+    }
     try {
       const result = await Notification.requestPermission();
       setPermission(result);
@@ -47,20 +51,43 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         // NOTE: FCM-based push notifications have been stubbed.
         // To re-enable push notifications, integrate a service like
         // OneSignal, Novu, or Web Push API here.
+        return true;
       }
+      setIsEnabled(false);
+      localStorage.setItem('mudmy_notifications_enabled', 'false');
+      if (result === 'denied') {
+        toast.error('การแจ้งเตือนถูกบล็อก กรุณาอนุญาตในการตั้งค่าเบราว์เซอร์');
+      }
+      return false;
     } catch (error) {
       console.error('Error requesting notification permission:', error);
+      toast.error('ไม่สามารถขอสิทธิ์การแจ้งเตือนได้');
+      return false;
     }
   };
 
   const toggleNotifications = async () => {
+    if (permission === 'default') {
+      await requestPermission();
+      return;
+    }
+
+    if (!isEnabled && permission === 'denied') {
+      toast.error('การแจ้งเตือนถูกบล็อก กรุณาอนุญาตในการตั้งค่าเบราว์เซอร์');
+      return;
+    }
+
     const nextState = !isEnabled;
     setIsEnabled(nextState);
     localStorage.setItem('mudmy_notifications_enabled', String(nextState));
 
     if (!nextState && user) {
       // Clear FCM token from DB when disabling
-      await updateFcmToken(user.id, null);
+      try {
+        await updateFcmToken(user.id, null);
+      } catch (error) {
+        console.error('Error disabling notification token:', error);
+      }
     }
   };
 

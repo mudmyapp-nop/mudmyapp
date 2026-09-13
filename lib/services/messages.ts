@@ -18,7 +18,7 @@ function mapRowToConversation(row: any): Conversation {
   }
 }
 
-const CHAT_IMAGE_RETENTION_MS = 7 * 24 * 60 * 60 * 1000
+const CHAT_IMAGE_RETENTION_MS = 10 * 24 * 60 * 60 * 1000
 
 function mapRowToMessage(row: any): Message {
   const createdAt = row.created_at ? new Date(row.created_at).getTime() : 0
@@ -146,8 +146,8 @@ export async function sendMessage(
   if (imageFile) {
     try {
       const { compressImage } = await import('@/lib/utils')
-      const compressedBlob = await compressImage(imageFile, 800, 0.6)
-      const extension = imageFile.name.split('.').pop() || 'jpg'
+      const compressedBlob = await compressImage(imageFile, 720, 0.55)
+      const extension = 'jpg'
       const fileName = `chats/${conversationId}/${Date.now()}.${extension}`
 
       const { error: uploadError } = await supabase.storage
@@ -214,6 +214,16 @@ export async function markConversationAsRead(conversationId: string, userId: str
   const updatedUnread = { ...conv.unread_count, [userId]: 0 }
 
   await supabase.from('conversations').update({ unread_count: updatedUnread }).eq('id', conversationId)
+}
+
+/** Delete a conversation and its messages for the current participant. */
+export async function deleteConversation(conversationId: string): Promise<void> {
+  const { error } = await supabase
+    .from('conversations')
+    .delete()
+    .eq('id', conversationId)
+
+  if (error) throw error
 }
 
 /**

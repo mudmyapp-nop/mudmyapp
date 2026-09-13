@@ -384,7 +384,7 @@ begin
   delete from storage.objects
   where bucket_id = 'mudmy'
     and (storage.foldername(name))[1] = 'chats'
-    and created_at < now() - interval '7 days';
+    and created_at < now() - interval '10 days';
 
   get diagnostics deleted_count = row_count;
   return deleted_count;

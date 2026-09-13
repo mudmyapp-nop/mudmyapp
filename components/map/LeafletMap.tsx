@@ -164,9 +164,17 @@ const CATEGORY_CONFIG: Record<string, { color: string; rgb: string; gradStart: s
   },
 }
 
-const createCategoryIcon = (category: string, isSelected: boolean) => {
+const escapeHtmlAttribute = (value: string) => value
+  .replace(/&/g, '&amp;')
+  .replace(/"/g, '&quot;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/'/g, '&#39;')
+
+const createCategoryIcon = (category: string, isSelected: boolean, imageUrl?: string) => {
   const info = CATEGORY_CONFIG[category] || CATEGORY_CONFIG.sell;
   const isEmergency = category === 'emergency';
+  const safeImageUrl = imageUrl ? escapeHtmlAttribute(imageUrl) : null;
   
   return L.divIcon({
     className: 'custom-leaflet-marker',
@@ -198,9 +206,11 @@ const createCategoryIcon = (category: string, isSelected: boolean) => {
                   fill="white" fill-opacity="0.28"/>
           </svg>
 
-          <!-- White Disc Badge with Category Icon -->
+          <!-- White Disc Badge with Uploaded Image or Category Icon -->
           <div class="pin-3d-icon-badge">
-            ${info.svg}
+            ${safeImageUrl
+              ? `<img src="${safeImageUrl}" alt="" class="pin-image-badge" />`
+              : info.svg}
           </div>
         </div>
       </div>
@@ -240,6 +250,18 @@ function MapUpdater({ center, zoom, animate = true }: { center?: [number, number
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [centerLat, centerLng, zoom, map, animate])
+
+  return null
+}
+
+function PopupSelectionSync({ selectedPin }: { selectedPin: Pin | null }) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!selectedPin) {
+      map.closePopup()
+    }
+  }, [map, selectedPin])
 
   return null
 }
@@ -337,6 +359,7 @@ export default function LeafletMap({
         
         {/* Updates map center when center prop changes (GPS locate, pin select) */}
         <MapUpdater center={center} zoom={zoom} />
+        <PopupSelectionSync selectedPin={selectedPin} />
         
         <MarkerClusterGroup
         chunkedLoading
@@ -352,12 +375,26 @@ export default function LeafletMap({
             <Marker
               key={pin.id}
               position={[pin.lat, pin.lng]}
-              icon={createCategoryIcon(pin.category, selectedPin?.id === pin.id)}
+              icon={createCategoryIcon(
+                pin.category,
+                selectedPin?.id === pin.id,
+                Array.isArray(pin.images) ? pin.images[0] : undefined
+              )}
               eventHandlers={{
                 click: () => onPinSelect(pin)
               }}
             >
-              <Popup className="custom-popup" key={`popup-${pin.id}`}>
+              <Popup
+                className="custom-popup"
+                key={`popup-${pin.id}`}
+                eventHandlers={{
+                  popupclose: () => {
+                    if (selectedPin?.id === pin.id) {
+                      onPinSelect(null)
+                    }
+                  },
+                }}
+              >
                 <div className="flex flex-col min-w-[220px] max-w-[260px] animate-scale-in">
                   <div className="w-full h-28 rounded-2xl overflow-hidden mb-3 shadow-sm border border-white/20 bg-muted/30 flex items-center justify-center relative">
                     {(() => {

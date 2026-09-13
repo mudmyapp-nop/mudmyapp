@@ -10,11 +10,7 @@ import { cn } from '@/lib/utils';
 
 export default function LandingPage() {
   const [heroImages] = useState<string[]>([
-    '/images/Hero/Hero1.jpg',
-    '/images/Hero/Hero2.jpg',
-    '/images/Hero/Hero3.jpg',
-    '/images/Hero/Hero4.jpg',
-    '/images/Hero/Hero5.jpg'
+    '/landingapp.jpg'
   ]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -75,23 +71,23 @@ export default function LandingPage() {
             exit={{ opacity: 0, scale: 0.95 }}
             className="flex flex-col justify-between h-full"
           >
-            <div className="text-center pt-8">
+            <div className="text-center pt-3 sm:pt-8">
               <motion.div 
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.2, type: "spring" }}
-                className="flex items-center justify-center gap-4 mb-4"
+                className="flex items-center justify-center gap-2 sm:gap-4 mb-2 sm:mb-4"
               >
-                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-2xl shadow-orange-500/20 border border-orange-100 p-1">
+                <div className="w-11 h-11 sm:w-16 sm:h-16 bg-white rounded-2xl flex items-center justify-center shadow-2xl shadow-orange-500/20 border border-orange-100 p-1">
                   <img src="/logo1.png" alt="Mudmy Logo" className="w-full h-full object-contain" />
                 </div>
                 <div className="text-left">
-                  <h1 className="text-5xl font-black tracking-tighter text-white leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+                  <h1 className="text-3xl sm:text-5xl font-black tracking-tighter text-white leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
                     Mudmy
                   </h1>
                 </div>
               </motion.div>
-              <p className="text-lg text-zinc-100 font-medium drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+              <p className="text-sm sm:text-lg text-white font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)]">
                 {t('landing.tagline')}
               </p>
             </div>
@@ -105,7 +101,7 @@ export default function LandingPage() {
               <motion.div
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                className="fixed bottom-56 left-6 glass-dark p-2 rounded-xl flex items-center gap-3 shadow-xl z-30 scale-75 origin-left"
+                className="hidden sm:flex fixed bottom-56 left-6 glass-dark p-2 rounded-xl items-center gap-3 shadow-xl z-30 scale-75 origin-left"
               >
                 <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
                   <Users className="text-blue-400 w-4 h-4" />
@@ -119,7 +115,7 @@ export default function LandingPage() {
               <motion.div
                 animate={{ y: [0, 10, 0] }}
                 transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                className="fixed bottom-40 right-6 glass-dark p-2 rounded-xl flex items-center gap-3 shadow-xl z-30 scale-75 origin-right"
+                className="hidden sm:flex fixed bottom-40 right-6 glass-dark p-2 rounded-xl items-center gap-3 shadow-xl z-30 scale-75 origin-right"
               >
                 <div className="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center">
                   <Compass className="text-orange-400 w-4 h-4" />
@@ -131,8 +127,8 @@ export default function LandingPage() {
               </motion.div>
             </div>
 
-            <div className="text-center space-y-3 mb-12">
-              <h2 className="text-3xl font-bold text-white leading-tight px-4 whitespace-pre-line drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+            <div className="text-center space-y-2 mb-5 sm:mb-12">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white leading-tight px-2 sm:px-4 whitespace-pre-line drop-shadow-[0_3px_6px_rgba(0,0,0,0.95)]">
                 {t('landing.heroTitle')}
               </h2>
               <div className="h-1 w-12 bg-orange-500 mx-auto rounded-full shadow-lg" />
@@ -148,13 +144,13 @@ export default function LandingPage() {
             exit={{ opacity: 0, x: -30 }}
             className="flex flex-col h-full"
           >
-            <div className="pt-8 mb-10">
+            <div className="pt-3 sm:pt-8 mb-4 sm:mb-10">
               <span className="text-orange-500 text-xs font-bold uppercase tracking-widest mb-2 block">Benefits</span>
-              <h2 className="text-4xl font-bold text-white mb-4">{t('landing.benefits.title')}</h2>
-              <p className="text-zinc-400 font-light">{t('landing.benefits.subtitle')}</p>
+              <h2 className="text-2xl sm:text-4xl font-bold text-white mb-2 sm:mb-4">{t('landing.benefits.title')}</h2>
+              <p className="text-xs sm:text-base text-white/90 font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">{t('landing.benefits.subtitle')}</p>
             </div>
 
-            <div className="flex-1 space-y-4 overflow-y-auto pr-2 custom-scrollbar">
+            <div className="flex-1 space-y-2 sm:space-y-4 overflow-y-auto pr-1 sm:pr-2 custom-scrollbar">
               {[
                 { icon: Star, ...(t('landing.benefits.items') as any)[0], color: "text-yellow-400" },
                 { icon: Rocket, ...(t('landing.benefits.items') as any)[1], color: "text-orange-400" },
@@ -166,14 +162,14 @@ export default function LandingPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}
-                  className="glass-dark p-5 rounded-[2rem] flex items-center gap-5 hover:bg-white/10 transition-all cursor-default group"
+                  className="glass-dark p-3 sm:p-5 rounded-2xl sm:rounded-[2rem] flex items-center gap-3 sm:gap-5 hover:bg-white/10 transition-all cursor-default group"
                 >
-                  <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                    <item.icon className={`${item.color} w-7 h-7`} />
+                  <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white/5 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <item.icon className={`${item.color} w-5 h-5 sm:w-7 sm:h-7`} />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white mb-1">{item.title}</h3>
-                    <p className="text-sm text-zinc-500 leading-snug">{item.desc}</p>
+                    <h3 className="text-sm sm:text-lg font-bold text-white mb-0.5 sm:mb-1">{item.title}</h3>
+                    <p className="text-[11px] sm:text-sm text-white/80 leading-snug drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">{item.desc}</p>
                   </div>
                 </motion.div>
               ))}
@@ -189,13 +185,13 @@ export default function LandingPage() {
             exit={{ opacity: 0, x: -30 }}
             className="flex flex-col h-full"
           >
-            <div className="pt-8 mb-10">
+            <div className="pt-3 sm:pt-8 mb-4 sm:mb-10">
               <span className="text-blue-500 text-xs font-bold uppercase tracking-widest mb-2 block">Guide</span>
-              <h2 className="text-4xl font-bold text-white mb-4">{t('landing.guide.title')}</h2>
-              <p className="text-zinc-400 font-light">{t('landing.guide.subtitle')}</p>
+              <h2 className="text-2xl sm:text-4xl font-bold text-white mb-2 sm:mb-4">{t('landing.guide.title')}</h2>
+              <p className="text-xs sm:text-base text-white/90 font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">{t('landing.guide.subtitle')}</p>
             </div>
 
-            <div className="flex-1 space-y-10">
+            <div className="flex-1 space-y-4 sm:space-y-10">
               {[
                 { step: "01", icon: MapIcon, ...(t('landing.guide.steps') as any)[0], color: "bg-blue-500" },
                 { step: "02", icon: Search, ...(t('landing.guide.steps') as any)[1], color: "bg-orange-500" },
@@ -206,20 +202,20 @@ export default function LandingPage() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.2 }}
-                  className="relative flex gap-6"
+                  className="relative flex gap-3 sm:gap-6"
                 >
                   <div className="flex flex-col items-center">
-                    <div className={`w-12 h-12 ${item.color} rounded-2xl flex items-center justify-center z-10 shadow-lg`}>
-                      <item.icon className="text-white w-6 h-6" />
+                    <div className={`w-9 h-9 sm:w-12 sm:h-12 ${item.color} rounded-xl sm:rounded-2xl flex items-center justify-center z-10 shadow-lg`}>
+                      <item.icon className="text-white w-4 h-4 sm:w-6 sm:h-6" />
                     </div>
                     {i < 2 && (
                       <div className="w-0.5 h-full bg-gradient-to-b from-white/20 to-transparent mt-2" />
                     )}
                   </div>
                   <div className="pt-1">
-                    <div className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">Step {item.step}</div>
-                    <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
-                    <p className="text-sm text-zinc-500 leading-relaxed">{item.desc}</p>
+                    <div className="text-[10px] font-black text-white/90 uppercase tracking-widest mb-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)]">Step {item.step}</div>
+                    <h3 className="text-base sm:text-xl font-bold text-white mb-1 sm:mb-2 drop-shadow-[0_3px_6px_rgba(0,0,0,0.95)]">{item.title}</h3>
+                    <p className="text-xs sm:text-sm text-white/90 leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)]">{item.desc}</p>
                   </div>
                 </motion.div>
               ))}
@@ -250,17 +246,17 @@ export default function LandingPage() {
             />
           </motion.div>
         </AnimatePresence>
-        {/* Completely clear as requested, no dark gradient or blur */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/20 to-black/65 pointer-events-none" />
       </div>
 
       {/* UI Overlay - Scrollable Content */}
-      <div className="relative z-10 min-h-[100dvh] flex flex-col p-8 pb-10">
+      <div className="relative z-10 min-h-[100dvh] flex flex-col p-4 sm:p-8 pb-4 sm:pb-10">
         {/* Navigation Controls */}
-        <div className="flex justify-between items-center mb-6 shrink-0 mt-8">
+        <div className="flex justify-between items-center mb-3 sm:mb-6 shrink-0 mt-2 sm:mt-8">
           {currentPage > 1 ? (
             <button 
               onClick={prevPage}
-              className="p-3 bg-white/5 rounded-2xl hover:bg-white/10 transition-all border border-white/5"
+              className="p-2 sm:p-3 bg-white/5 rounded-2xl hover:bg-white/10 transition-all border border-white/5"
             >
               <ChevronLeft className="w-5 h-5 text-zinc-400" />
             </button>
@@ -280,7 +276,7 @@ export default function LandingPage() {
           <div className="w-11">
              <button 
               onClick={() => router.push('/login')}
-              className="text-xs font-bold text-zinc-400 hover:text-white transition-colors uppercase whitespace-nowrap"
+              className="text-[10px] sm:text-xs font-bold text-zinc-400 hover:text-white transition-colors uppercase whitespace-nowrap"
             >
               {t('navbar.login')}
             </button>
@@ -298,12 +294,12 @@ export default function LandingPage() {
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="mt-10 space-y-6 shrink-0"
+          className="mt-4 sm:mt-10 space-y-3 sm:space-y-6 shrink-0"
         >
           <button 
             onClick={nextPage}
             className={cn(
-              "w-full py-5 font-bold rounded-[2rem] transition-all flex items-center justify-center gap-3 group relative overflow-hidden",
+              "w-full py-3.5 sm:py-5 text-sm sm:text-base font-bold rounded-2xl sm:rounded-[2rem] transition-all flex items-center justify-center gap-3 group relative overflow-hidden",
               currentPage === 3 
                 ? "fancy-button fancy-button-shimmer-auto fancy-button-glow text-white shadow-orange-500/25" 
                 : "bg-white text-black hover:scale-[1.02] active:scale-[0.98] shadow-lg"
@@ -316,7 +312,7 @@ export default function LandingPage() {
           </button>
           
           <div className="flex justify-center items-center gap-8">
-            <button onClick={() => router.push('/explore')} className="text-zinc-500 hover:text-white transition-colors text-xs font-medium uppercase tracking-widest flex items-center gap-2">
+            <button onClick={() => router.push('/explore')} className="text-zinc-500 hover:text-white transition-colors text-[10px] sm:text-xs font-medium uppercase tracking-widest flex items-center gap-2">
               <MapIcon className="w-4 h-4" /> {t('landing.viewMap')}
             </button>
           </div>

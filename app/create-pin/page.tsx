@@ -24,6 +24,7 @@ import { incrementUserActivePins, getUserProfile, updateUserProfile } from '@/li
 import { CATEGORIES, type PinCategory, type Pin } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import dynamic from 'next/dynamic'
+import { toast } from 'sonner'
 
 const ICON_MAP: Record<string, React.ElementType> = {
   ShoppingBag,
@@ -71,6 +72,10 @@ function CreatePinContent() {
   }, [searchParams])
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [step])
+
+  useEffect(() => {
     async function fetchUserProfile() {
       if (!user) return
       try {
@@ -105,7 +110,6 @@ function CreatePinContent() {
   const [paymentLoading, setPaymentLoading] = useState(false)
   const [paymentDone, setPaymentDone] = useState(false)
   const [createdPinId, setCreatedPinId] = useState<string | null>(null)
-  const [paymentSource, setPaymentSource] = useState<any>(null)
   const [paymentError, setPaymentError] = useState<string | null>(null)
  
   if (banStatus.banned) {
@@ -155,7 +159,7 @@ function CreatePinContent() {
       const files = Array.from(e.target.files)
       const maxImages = 3
       if (images.length + files.length > maxImages) {
-        alert(t('createPin.alerts.maxImages', { count: maxImages }))
+        toast.error(t('createPin.alerts.maxImages', { count: maxImages }))
         return
       }
       setImages((prev) => [...prev, ...files])
@@ -168,13 +172,14 @@ function CreatePinContent() {
 
   const handlePayment = async () => {
     if (!user) {
-      alert(t('createPin.alerts.loginRequired'))
+      toast.error(t('createPin.alerts.loginRequired'))
       router.push('/login')
       return;
     }
 
     setPaymentLoading(true)
     setPaymentError(null)
+    let paymentStep = 'สร้างประกาศ'
     try {
       const now = new Date();
       const expiresAt = new Date(now);
@@ -229,7 +234,7 @@ function CreatePinContent() {
       const isValidLat = typeof lat === 'number' && lat >= -90 && lat <= 90;
       const isValidLng = typeof lng === 'number' && lng >= -180 && lng <= 180;
       if (!isValidLat || !isValidLng) {
-        alert('พิกัดไม่ถูกต้อง กรุณาเลือกตำแหน่งใหม่');
+        toast.error('พิกัดไม่ถูกต้อง กรุณาเลือกตำแหน่งใหม่');
         return;
       }
 
@@ -237,6 +242,7 @@ function CreatePinContent() {
       setCreatedPinId(pinId);
 
       if (isFree) {
+        paymentStep = 'บันทึกข้อมูลการชำระเงิน'
         await incrementUserActivePins(user.id, 1);
         await updateUserProfile(user.id, {
           hasUsedFreePin: true,
@@ -247,7 +253,7 @@ function CreatePinContent() {
           pinId: pinId,
           amount: 0,
           status: 'paid',
-          method: 'promptpay',
+          method: 'free',
           createdAt: now.toISOString(),
           paidAt: now.toISOString(),
         });
@@ -255,6 +261,17 @@ function CreatePinContent() {
         return;
       }
 
+      paymentStep = 'บันทึกข้อมูลการชำระเงิน'
+      const paymentId = await createPayment({
+        userId: user.id,
+        pinId,
+        amount: 10,
+        status: 'pending',
+        method: 'stripe',
+        createdAt: now.toISOString(),
+      });
+
+      paymentStep = 'เริ่มการชำระเงินกับ Stripe'
       const paymentResponse = await fetch('/api/payments/charge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -264,31 +281,23 @@ function CreatePinContent() {
           description: `Mudmy pin listing - ${title || 'New pin'}`,
           userId: user.id,
           pinId,
+          paymentId,
         }),
       });
 
       const paymentPayload = await paymentResponse.json();
       if (!paymentResponse.ok) {
-        throw new Error(paymentPayload?.error || 'Unable to start Omise payment');
+        throw new Error(paymentPayload?.error || 'Unable to start Stripe payment');
       }
 
-      const source = paymentPayload.source || paymentPayload.data?.source;
-      setPaymentSource(source);
-      await createPayment({
-        userId: user.id,
-        pinId: pinId,
-        amount: 10,
-        status: 'pending',
-        method: 'promptpay',
-        createdAt: now.toISOString(),
-        promptpayRef: source?.id || paymentPayload?.reference || undefined,
-      });
-
-      setPaymentDone(true);
+      if (!paymentPayload.url) throw new Error('Stripe Checkout URL was not returned');
+      window.location.assign(paymentPayload.url);
     } catch (e) {
       console.error(e);
-      setPaymentError(e instanceof Error ? e.message : t('createPin.alerts.error'));
-      alert(e instanceof Error ? e.message : t('createPin.alerts.error'));
+      const detail = e instanceof Error ? e.message : t('createPin.alerts.error');
+      const message = `${paymentStep}ไม่สำเร็จ: ${detail}`;
+      setPaymentError(message);
+      toast.error(message);
     } finally {
       setPaymentLoading(false);
     }
@@ -742,7 +751,7 @@ function CreatePinContent() {
                   <div className="bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-200 rounded-3xl p-6 text-center space-y-4 shadow-lg">
                     <h3 className="text-sm font-semibold text-foreground">การชำระเงิน</h3>
                     <p className="text-xs text-muted-foreground">
-                      ขณะนี้ระบบชำระเงินยังไม่พร้อมใช้งาน คุณสามารถสร้างหมุดได้เลยสำหรับการทดสอบ
+                      คุณจะถูกนำไปยัง Stripe เพื่อชำระเงินอย่างปลอดภัย
                     </p>
                     <p className="text-3xl font-bold text-orange-600">10 {t('createPin.payment.baht')}</p>
                   </div>
@@ -765,6 +774,11 @@ function CreatePinContent() {
                     )}
                   </Button>
                 </div>
+                {paymentError && (
+                  <p role="alert" className="text-sm text-red-600 text-center font-medium">
+                    {paymentError}
+                  </p>
+                )}
               </>
             ) : (
               /* Success */

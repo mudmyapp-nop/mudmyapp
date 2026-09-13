@@ -330,6 +330,7 @@ create table if not exists public.payments (
   status text not null,
   method text not null,
   promptpay_ref text,
+  stripe_session_id text,
   created_at timestamp with time zone not null default now(),
   paid_at timestamp with time zone,
   updated_at timestamp with time zone not null default now()

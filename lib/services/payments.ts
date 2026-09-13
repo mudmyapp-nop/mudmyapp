@@ -11,6 +11,7 @@ function mapRowToPayment(row: any): Payment {
     status: row.status,
     method: row.method,
     promptpayRef: row.promptpay_ref,
+    stripeSessionId: row.stripe_session_id,
     createdAt: row.created_at,
     paidAt: row.paid_at,
   };
@@ -29,6 +30,7 @@ export async function createPayment(paymentData: Omit<Payment, 'id'>): Promise<s
         status: paymentData.status,
         method: paymentData.method,
         promptpay_ref: paymentData.promptpayRef ?? null,
+        stripe_session_id: paymentData.stripeSessionId ?? null,
         created_at: paymentData.createdAt ?? new Date().toISOString(),
         paid_at: paymentData.paidAt ?? null,
       })

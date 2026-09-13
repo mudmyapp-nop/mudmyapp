@@ -420,7 +420,7 @@ export function PinBottomSheet({ pin, onClose }: PinBottomSheetProps) {
           )}
         >
           {user ? (
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {pin.contact?.phone && (
                 <a href={`tel:${pin.contact.phone}`} onClick={handlePhoneClick} className="shrink-0">
                   <Button
@@ -558,7 +558,7 @@ export function PinBottomSheet({ pin, onClose }: PinBottomSheetProps) {
               )}
               {!isOwner ? (
                 <Button
-                  className="flex-1 h-12 rounded-2xl font-semibold bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25"
+                  className="basis-full h-12 rounded-2xl font-semibold bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 sm:basis-0 sm:flex-1"
                   onClick={() => setIsChatOpen(true)}
                   disabled={banStatus.banned}
                 >
